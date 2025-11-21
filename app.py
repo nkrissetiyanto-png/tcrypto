@@ -16,7 +16,7 @@ st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Sty
 # 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-df = load_initial_candles("BTC_USDT")
+df = load_initial_candles("BTCUSDT")
 
 # ==============================================================
 # 2) START WEBSOCKET
@@ -63,7 +63,8 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
 
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
-
+    
+    st.write("Jumlah Bar:", len(df))
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
