@@ -15,6 +15,7 @@ def load_initial_candles(symbol="BTCUSDT"):
     # Tampilkan di UI Streamlit (bukan print)
     with st.expander("📄 RAW RESPONSE dari MEXC"):
         st.json(raw)
+        st.write(url)
 
     if "data" not in raw:
         st.error("MEXC ERROR: API tidak mengembalikan data candle!")
