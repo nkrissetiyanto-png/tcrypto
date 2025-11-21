@@ -1,8 +1,8 @@
 streamlit
-lightgbm
+websocket-client
 websockets
 pandas
 numpy
 plotly
 requests
-websocket-client
+scikit-learn
