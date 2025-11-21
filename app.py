@@ -12,34 +12,42 @@ st.set_page_config(page_title="Nanang AI Trading Premium", layout="wide")
 st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Style)")
 
 # ==============================================================
-# 1) LOAD INITIAL DATA + START WEBSOCKET
+# 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
 df = load_initial_candles("BTCUSDT")
 
+# ==============================================================
+# 2) START WEBSOCKET
+# ==============================================================
+
 ws = CryptoWebSocket("btcusdt")
-ws.start()  # websocket live
+ws.start()  # websocket berjalan di background
 
 ai = AIPredictor()
 
 # ==============================================================
-# 2) ORDERBOOK (REST)
+# 3) ORDERBOOK REST API
 # ==============================================================
-self.is_running = True
-
-st.sidebar.write("📡 WebSocket Connected:", ws.is_running)
-st.sidebar.write("📈 Last Price:", price_realtime)
-st.sidebar.write("🧊 Bids Count:", len(bids_df))
-st.sidebar.write("🔥 Asks Count:", len(asks_df))
 
 ob = OrderbookClient("btcusdt")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-price_realtime = df['close'].iloc[-1] if len(df)>0 else None
+price_realtime = df['close'].iloc[-1] if len(df) > 0 else None
 
 # ==============================================================
-# 3) DEBUG PANEL — CEK APAKAH DATA MASUK
+# 4) SIDEBAR STATUS PANEL
 # ==============================================================
+
+st.sidebar.write("📡 WebSocket Connected:", getattr(ws, "is_running", True))
+st.sidebar.write("📈 Last Price:", price_realtime)
+st.sidebar.write("🧊 Bids Count:", len(bids_df))
+st.sidebar.write("🔥 Asks Count:", len(asks_df))
+
+# ==============================================================
+# 5) DEBUG PANEL
+# ==============================================================
+
 with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
     st.subheader("Last Raw Depth Data")
     st.json(depth_raw)
@@ -51,7 +59,7 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
     st.dataframe(asks_df)
 
 # ==============================================================
-# 4) LAYOUT — CHART + ORDERBOOK
+# 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
 
 col1, col2 = st.columns([3, 1])
@@ -59,8 +67,8 @@ col1, col2 = st.columns([3, 1])
 with col1:
     st.subheader("Realtime Chart (1m)")
 
-    # update df from websocket if exists
-    df_live = ws.df if ws.df is not None else df
+    # Ambil data dari websocket bila tersedia
+    df_live = ws.df if getattr(ws, "df", None) is not None else df
 
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
@@ -77,5 +85,3 @@ with col2:
     st.subheader("Orderbook Depth")
     st.write("Bids", bids_df.head())
     st.write("Asks", asks_df.head())
-
-# =============================================================
