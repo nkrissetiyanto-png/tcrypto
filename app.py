@@ -25,7 +25,7 @@ ai = AIPredictor()
 # ==============================================================
 # 2) ORDERBOOK (REST)
 # ==============================================================
-st.sidebar.write("📡 WebSocket Connected:", ws.last_ping)
+st.sidebar.write("📡 WebSocket Connected:", ws.is_running)
 st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
