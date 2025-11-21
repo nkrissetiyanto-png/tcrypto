@@ -23,6 +23,11 @@ ai = AIPredictor()
 
 # Orderbook
 ob = OrderbookClient("btcusdt")
+depth_raw = ob_raw              # response JSON mentah
+bids_df = bids                  # dataframe bids
+asks_df = asks                  # dataframe asks
+price_realtime = df['close'].iloc[-1] if len(df)>0 else None
+
 # =============================
 # DEBUG PANEL — CEK DATA MASUK
 # =============================
