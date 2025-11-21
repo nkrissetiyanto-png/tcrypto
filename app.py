@@ -20,8 +20,7 @@ st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Sty
 # 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-#df = load_initial_candles("BTCUSDT")
-df_live = cs.df if len(cs.df) > 0 else df
+df = load_initial_candles("BTCUSDT")
 
 # ==============================================================
 # 2) START WEBSOCKET
@@ -80,7 +79,8 @@ with col1:
     st.subheader("Realtime Chart (1m)")
 
     # Ambil data dari websocket bila tersedia
-    df_live = ws.df if getattr(ws, "df", None) is not None else df
+    #df_live = ws.df if getattr(ws, "df", None) is not None else df
+    df_live = cs.df if len(cs.df) > 0 else df
 
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
