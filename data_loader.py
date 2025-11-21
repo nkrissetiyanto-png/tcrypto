@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 
-def load_initial_candles(symbol="BTC_USDT"):
+def load_initial_candles(symbol="BTCUSDT"):
     """
     Ambil historical candle 1 menit dari MEXC
     FORMAT MEXC: [timestamp, open, high, low, close, volume]
