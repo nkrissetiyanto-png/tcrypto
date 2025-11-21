@@ -25,17 +25,21 @@ ai = AIPredictor()
 # ==============================================================
 # 2) ORDERBOOK (REST)
 # ==============================================================
+st.sidebar.write("📡 WebSocket Connected:", ws.last_ping)
+st.sidebar.write("📈 Last Price:", price_realtime)
+st.sidebar.write("🧊 Bids Count:", len(bids_df))
+st.sidebar.write("🔥 Asks Count:", len(asks_df))
 
 ob = OrderbookClient("btcusdt")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
 price_realtime = df['close'].iloc[-1] if len(df)>0 else None
+
 # ==============================================================
 # 3) DEBUG PANEL — CEK APAKAH DATA MASUK
 # ==============================================================
-
 with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
-    st.subheader("Last Raw Orderbook")
+    st.subheader("Last Raw Depth Data")
     st.json(depth_raw)
 
     st.subheader("Parsed Bids")
@@ -43,9 +47,6 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
 
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
-
-    st.subheader("Realtime Price (WebSocket)")
-    st.write(last_price)
 
 # ==============================================================
 # 4) LAYOUT — CHART + ORDERBOOK
