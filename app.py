@@ -23,6 +23,21 @@ ai = AIPredictor()
 
 # Orderbook
 ob = OrderbookClient("btcusdt")
+# =============================
+# DEBUG PANEL — CEK DATA MASUK
+# =============================
+with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
+    st.subheader("Last Raw Depth Data")
+    st.json(depth_raw)
+
+    st.subheader("Parsed Bids")
+    st.dataframe(bids_df)
+
+    st.subheader("Parsed Asks")
+    st.dataframe(asks_df)
+
+    st.subheader("Realtime Price (Terakhir Diterima)")
+    st.write(price_realtime)
 
 # Layout
 col1, col2 = st.columns([3,1])
