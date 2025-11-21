@@ -4,37 +4,72 @@ from sklearn.ensemble import RandomForestRegressor
 
 class AIPredictor:
     def __init__(self):
-        # model yang ringan & stabil di Streamlit Cloud
         self.model = RandomForestRegressor(
-            n_estimators=100,
-            max_depth=5,
-            random_state=42,
+            n_estimators=120,
+            max_depth=6,
+            random_state=42
         )
         self.trained = False
 
+
+    def safe_last_close(self, df):
+        """Return last close safely without crashing."""
+        try:
+            return float(df["close"].iloc[-1])
+        except:
+            return None
+
+
     def train(self, df):
-        # fitur sederhana: close, volume, return
-        temp = df.copy().dropna().tail(300)  # batasi supaya ringan
+        # Minimal data requirement: 20 bars
+        if df is None or len(df) < 20:
+            self.trained = False
+            return
+
+        temp = df.copy().tail(300).dropna()
+
         temp["return"] = temp["close"].pct_change().fillna(0)
 
+        # Features
         X = temp[["close", "volume", "return"]].values
         y = temp["close"].shift(-1).fillna(method="ffill").values
 
         self.model.fit(X, y)
         self.trained = True
 
-    def predict(self, df):
-        if len(df) < 10:
-            return float(df["close"].iloc[-1])
 
+    def predict(self, df):
+        """
+        Predict next 1-minute close price with full safety.
+        """
+
+        # If no data, return None safely
+        if df is None or len(df) == 0:
+            return None
+
+        # If only 1 bar, return that bar
+        if len(df) < 5:
+            return self.safe_last_close(df)
+
+        # Train if not trained
         if not self.trained:
             self.train(df)
 
-        last = df.tail(2).copy()
-        last["return"] = last["close"].pct_change().fillna(0)
-        row = last.iloc[-1]
+        # If still not trained, fallback
+        if not self.trained:
+            return self.safe_last_close(df)
 
-        X_last = np.array([[row["close"], row["volume"], row["return"]]])
-        pred_price = float(self.model.predict(X_last)[0])
+        # SAFE extract last values
+        last_close = float(df["close"].iloc[-1])
+        last_vol = float(df["volume"].iloc[-1])
+        last_return = df["close"].pct_change().iloc[-1]
+        if np.isnan(last_return):
+            last_return = 0
 
-        return pred_price
+        X_last = np.array([[last_close, last_vol, last_return]])
+
+        try:
+            pred_price = float(self.model.predict(X_last)[0])
+            return pred_price
+        except:
+            return self.safe_last_close(df)
