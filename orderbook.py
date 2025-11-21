@@ -3,7 +3,7 @@ import pandas as pd
 
 class OrderbookClient:
     def __init__(self, symbol="BTCUSDT"):
-        self.url = f"https://api.binance.com/api/v3/depth?symbol={symbol.upper()}&limit=50"
+        self.url = f"wss://data-stream.binance.vision/ws/{SYMBOL}@kline_1s"
 
     def get_depth(self):
         r = requests.get(self.url, timeout=5)
