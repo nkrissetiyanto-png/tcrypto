@@ -1,69 +1,58 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from data_loader import load_initial_candles   # REST klines
+from data_loader import load_initial_candles
 from ai_engine import AIPredictor
 from smartmoney import compute_smart_money
-from orderbook_mexc import OrderbookMEXC       # REST orderbook
-from ws_mexc import MEXCWebSocket              # LIVE websocket ticker
+from orderbook_mexc import OrderbookMEXC
+from ws_mexc import MEXCWebSocket
 
-
-# ==============================================================
-# STREAMLIT PAGE CONFIG
-# ==============================================================
 
 st.set_page_config(page_title="Nanang AI Trading Premium", layout="wide")
+
 st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Style)")
 
-
 # ==============================================================
-# 1) LOAD INITIAL CANDLE DATA (REST API)
+# 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-# ❗ IMPORTANT: MEXC REST uses symbol WITHOUT underscore → BTCUSDT
 df = load_initial_candles("BTCUSDT")
 
-with st.expander("📄 Debug DF Candle (REST)"):
-    st.write(df)
-    st.write("Jumlah Bar:", len(df))
-
-if df.empty:
-    st.error("❌ REST API candle (klines) dari MEXC kosong! Chart tidak bisa ditampilkan.")
-    st.stop()
-
-
 # ==============================================================
-# 2) START LIVE WEBSOCKET (MEXC)
+# 2) START WEBSOCKET
 # ==============================================================
 
-ws = MEXCWebSocket("BTC_USDT")   # websocket FORMAT pakai underscore
+#ws = CryptoWebSocket("btcusdt")
+#ws.start()  # websocket berjalan di background
+
+ai = AIPredictor()
+
+# ==============================================================
+# 3) ORDERBOOK REST API
+# ==============================================================
+
+#ob = OrderbookClient("btcusdt")
+#depth_raw, bids_df, asks_df = ob.get_depth()
+ws = MEXCWebSocket("BTC_USDT")
 ws.start()
-
-
-# ==============================================================
-# 3) ORDERBOOK (REST API)
-# ==============================================================
 
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-# harga realtime fallback dari REST saja
-price_realtime = df['close'].iloc[-1]
-
+price_realtime = df['close'].iloc[-1] if len(df) > 0 else None
 
 # ==============================================================
 # 4) SIDEBAR STATUS PANEL
 # ==============================================================
 
-st.sidebar.subheader("Status Monitor")
 st.sidebar.write("📡 WebSocket Connected:", getattr(ws, "is_running", True))
 st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
-
+st.sidebar.write("Jumlah Bar:", len(df))
 
 # ==============================================================
-# 5) DEBUG PANEL — LIHAT DATA RAW
+# 5) DEBUG PANEL
 # ==============================================================
 
 with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
@@ -75,22 +64,18 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
 
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
-
-
+    
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
 
 col1, col2 = st.columns([3, 1])
 
-
-# ================= CHART =================
 with col1:
+    st.subheader("Realtime Chart (1m)")
 
-    st.subheader("📊 Realtime Chart (1m)")
-
-    # Websocket MEXC tidak mengirim candle → gunakan REST candle (df)
-    df_live = df
+    # Ambil data dari websocket bila tersedia
+    df_live = ws.df if getattr(ws, "df", None) is not None else df
 
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
@@ -98,40 +83,12 @@ with col1:
         open=df_live["open"],
         high=df_live["high"],
         low=df_live["low"],
-        close=df_live["close"],
-        name="price"
+        close=df_live["close"]
     ))
-
-    fig.update_layout(
-        height=500,
-        template="plotly_dark",
-        xaxis_rangeslider_visible=False
-    )
-
+    fig.update_layout(height=500, template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
-
-# ================= ORDERBOOK =================
 with col2:
-
-    st.subheader("📘 Orderbook Depth (MEXC)")
-
-    st.write("Bids (Buy Orders)")
-    st.dataframe(bids_df.head())
-
-    st.write("Asks (Sell Orders)")
-    st.dataframe(asks_df.head())
-
-
-# ==============================================================
-# 7) AI PREDICTION
-# ==============================================================
-
-st.subheader("🤖 AI Prediction (Next 1m)")
-ai = AIPredictor()
-
-try:
-    pred = ai.predict(df_live)
-    st.metric("Prediction", pred)
-except Exception as e:
-    st.error(f"AI Error: {e}")
+    st.subheader("Orderbook Depth")
+    st.write("Bids", bids_df.head())
+    st.write("Asks", asks_df.head())
