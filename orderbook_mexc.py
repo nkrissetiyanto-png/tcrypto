@@ -7,14 +7,12 @@ class OrderbookMEXC:
 
     def get_depth(self):
         url = f"https://api.mexc.com/api/v3/depth?symbol={self.symbol}&limit=20"
-        r = requests.get(url)
+        r = requests.get(url, timeout=5).json()
 
-        raw = r.json()
+        if "bids" not in r or "asks" not in r:
+            return r, pd.DataFrame(), pd.DataFrame()
 
-        if "bids" not in raw or "asks" not in raw:
-            return raw, pd.DataFrame(), pd.DataFrame()
+        bids = pd.DataFrame(r["bids"], columns=["price","qty"]).astype(float)
+        asks = pd.DataFrame(r["asks"], columns=["price","qty"]).astype(float)
 
-        bids = pd.DataFrame(raw["bids"], columns=["price","qty"]).astype(float)
-        asks = pd.DataFrame(raw["asks"], columns=["price","qty"]).astype(float)
-
-        return raw, bids, asks
+        return r, bids, asks
