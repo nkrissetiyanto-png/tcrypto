@@ -5,7 +5,7 @@ import streamlit as st
 
 def load_initial_candles(symbol="BTCUSDT"):
     symbol = symbol.replace("-", "").replace("_", "").upper()
-    symbol = f"{symbol[:-4]}_{symbol[-4:]}"   # BTCUSDT → BTC_USDT
+    #symbol = f"{symbol[:-4]}_{symbol[-4:]}"   # BTCUSDT → BTC_USDT
 
     url = f"https://api.mexc.com/api/v2/market/kline?symbol={symbol}&interval=1m&limit=200"
 
