@@ -5,15 +5,18 @@ from websocket_engine import CryptoWebSocket
 from data_loader import load_initial_candles
 from ai_engine import AIPredictor
 from smartmoney import compute_smart_money
-from orderbook import OrderbookClient
-from orderbook_ws import OrderbookWebSocket
+#from orderbook import OrderbookClient
+#from orderbook_ws import OrderbookWebSocket
+from orderbook_mexc import OrderbookMEXC
+from ws_mexc import MEXCWebSocket
 
-ob_ws = OrderbookWebSocket("btcusdt")
-ob_ws.start()
+#ob_ws = OrderbookWebSocket("btcusdt")
+#ob_ws.start()
+
 
 # gunakan ini untuk display
-bids_df = ob_ws.bids
-asks_df = ob_ws.asks
+#bids_df = ob_ws.bids
+#asks_df = ob_ws.asks
 
 st.set_page_config(page_title="Nanang AI Trading Premium", layout="wide")
 
@@ -38,7 +41,12 @@ ai = AIPredictor()
 # 3) ORDERBOOK REST API
 # ==============================================================
 
-ob = OrderbookClient("btcusdt")
+#ob = OrderbookClient("btcusdt")
+#depth_raw, bids_df, asks_df = ob.get_depth()
+ws = MEXCWebSocket("BTC_USDT")
+ws.start()
+
+ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
 price_realtime = df['close'].iloc[-1] if len(df) > 0 else None
