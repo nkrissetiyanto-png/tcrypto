@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-f#rom websocket_engine import CryptoWebSocket
+#from websocket_engine import CryptoWebSocket
 from data_loader import load_initial_candles
 from ai_engine import AIPredictor
 from smartmoney import compute_smart_money
