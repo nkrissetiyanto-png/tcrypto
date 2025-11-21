@@ -3,21 +3,27 @@ import pandas as pd
 
 class OrderbookClient:
     def __init__(self, symbol="BTCUSDT"):
-        self.url = f"https://api.binance.com/api/v3/depth?symbol={symbol.upper()}&limit=50"
+        self.symbol = symbol.lower()
+        self.url = f"https://api.binance.com/api/v3/depth?symbol={symbol}&limit=20"
 
     def get_depth(self):
-        r = requests.get(self.url, timeout=5)
-
         try:
-            raw = r.json()
-        except:
-            return {}, pd.DataFrame(), pd.DataFrame()
+            response = requests.get(self.url, timeout=5)
 
-        # Jika API diblokir
-        if "bids" not in raw:
-            return raw, pd.DataFrame(), pd.DataFrame()
+            # kalau responsenya soft-block dari Binance
+            if response.status_code != 200:
+                return {"error": "Binance blocked this region"}, pd.DataFrame(), pd.DataFrame()
 
-        bids = pd.DataFrame(raw["bids"], columns=["price", "qty"]).astype(float)
-        asks = pd.DataFrame(raw["asks"], columns=["price", "qty"]).astype(float)
+            raw = response.json()
 
-        return raw, bids, asks
+            if "bids" not in raw:
+                return raw, pd.DataFrame(), pd.DataFrame()
+
+            # parsing bids & asks
+            bids = pd.DataFrame(raw["bids"], columns=["price", "qty"], dtype=float)
+            asks = pd.DataFrame(raw["asks"], columns=["price", "qty"], dtype=float)
+
+            return raw, bids, asks
+
+        except Exception as e:
+            return {"error": str(e)}, pd.DataFrame(), pd.DataFrame()
