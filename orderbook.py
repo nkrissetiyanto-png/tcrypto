@@ -1,34 +1,23 @@
-import websocket
-import threading
-import json
+import requests
 import pandas as pd
 
-class OrderbookWebSocket:
-    def __init__(self, symbol="btcusdt"):
-        self.url = f"wss://stream.binance.com:9443/ws/{symbol}@depth@100ms"
-        self.bids = pd.DataFrame(columns=["price", "qty"])
-        self.asks = pd.DataFrame(columns=["price", "qty"])
+class OrderbookClient:
+    def __init__(self, symbol="BTCUSDT"):
+        self.url = f"https://api.binance.com/api/v3/depth?symbol={symbol.upper()}&limit=50"
 
-    def on_message(self, ws, message):
-        data = json.loads(message)
-
-        if "b" not in data or "a" not in data:
-            return
+    def get_depth(self):
+        r = requests.get(self.url, timeout=5)
 
         try:
-            self.bids = pd.DataFrame(data["b"], columns=["price", "qty"]).astype(float)
-            self.asks = pd.DataFrame(data["a"], columns=["price", "qty"]).astype(float)
+            raw = r.json()
         except:
-            pass
+            return {}, pd.DataFrame(), pd.DataFrame()
 
-    def start(self):
-        t = threading.Thread(target=self._run)
-        t.daemon = True
-        t.start()
+        # Jika API diblokir
+        if "bids" not in raw:
+            return raw, pd.DataFrame(), pd.DataFrame()
 
-    def _run(self):
-        ws = websocket.WebSocketApp(
-            self.url,
-            on_message=self.on_message
-        )
-        ws.run_forever()
+        bids = pd.DataFrame(raw["bids"], columns=["price", "qty"]).astype(float)
+        asks = pd.DataFrame(raw["asks"], columns=["price", "qty"]).astype(float)
+
+        return raw, bids, asks
