@@ -5,20 +5,21 @@ import pandas as pd
 
 class MEXCWebSocket:
     def __init__(self, symbol="BTC_USDT"):
-        self.symbol = symbol.lower()
+        self.symbol = symbol
+        self.url = "wss://wbs.mexc.com/ws"
         self.last_candle = None
-        self.url = f"wss://wbs.mexc.com/ws"
+        self.df = pd.DataFrame(columns=["time","open","high","low","close","volume"])
 
-    def _on_message(self, ws, message):
-        data = json.loads(message)
+    def _on_message(self, ws, msg):
+        data = json.loads(msg)
 
-        if "c" not in data: 
+        if "data" not in data:
             return
 
-        k = data["c"]
+        k = data["data"]
 
-        self.last_candle = {
-            "time": pd.to_datetime(k["T"], unit="ms"),
+        candle = {
+            "time": pd.to_datetime(k["t"], unit='ms'),
             "open": float(k["o"]),
             "high": float(k["h"]),
             "low": float(k["l"]),
@@ -26,17 +27,19 @@ class MEXCWebSocket:
             "volume": float(k["v"]),
         }
 
+        self.last_candle = candle
+        self.df = pd.concat([self.df, pd.DataFrame([candle])], ignore_index=True)
+
     def _on_open(self, ws):
-        sub_msg = {
+        sub = {
             "method": "SUBSCRIPTION",
             "params": [f"spot@public.kline.v3.api@{self.symbol}@Min1"]
         }
-        ws.send(json.dumps(sub_msg))
+        ws.send(json.dumps(sub))
 
     def start(self):
-        thread = threading.Thread(target=self._run)
-        thread.daemon = True
-        thread.start()
+        t = threading.Thread(target=self._run, daemon=True)
+        t.start()
 
     def _run(self):
         ws = websocket.WebSocketApp(
