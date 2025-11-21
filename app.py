@@ -49,6 +49,7 @@ st.sidebar.write("📡 WebSocket Connected:", getattr(ws, "is_running", True))
 st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
+st.sidebar.write("Jumlah Bar:", len(df))
 
 # ==============================================================
 # 5) DEBUG PANEL
@@ -64,7 +65,6 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
     
-    st.write("Jumlah Bar:", len(df))
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
