@@ -27,10 +27,9 @@ ai = AIPredictor()
 # ==============================================================
 
 ob = OrderbookClient("btcusdt")
-depth_raw, bids_df, asks_df = ob.get_depth_raw()
+depth_raw, bids_df, asks_df = ob.get_depth()
 
-last_price = ws.last_price if ws.last_price else df["close"].iloc[-1]
-
+price_realtime = df['close'].iloc[-1] if len(df)>0 else None
 # ==============================================================
 # 3) DEBUG PANEL — CEK APAKAH DATA MASUK
 # ==============================================================
