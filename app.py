@@ -6,7 +6,11 @@ from ai_engine import AIPredictor
 from smartmoney import compute_smart_money
 from orderbook_mexc import OrderbookMEXC
 from ws_mexc import MEXCWebSocket
+from ws_candle_mexc import MEXCCandleWS
+from orderbook_mexc import OrderbookMEXC
 
+cs = MEXCCandleWS("BTC_USDT")
+cs.start()
 
 st.set_page_config(page_title="Nanang AI Trading Premium", layout="wide")
 
@@ -16,7 +20,8 @@ st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Sty
 # 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-df = load_initial_candles("BTCUSDT")
+#df = load_initial_candles("BTCUSDT")
+df_live = cs.df if len(cs.df) > 0 else df
 
 # ==============================================================
 # 2) START WEBSOCKET
