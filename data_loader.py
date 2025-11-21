@@ -23,6 +23,7 @@ def load_initial_candles(symbol="BTCUSDT"):
     try:
         r = requests.get(url, timeout=10)
         data = r.json()
+        print("RAW RESPONSE:", data)
 
         # Jika MEXC mengembalikan error JSON
         if not isinstance(data, list):
