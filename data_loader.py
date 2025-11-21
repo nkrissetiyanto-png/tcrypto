@@ -2,35 +2,50 @@ import requests
 import pandas as pd
 
 
+def normalize_symbol(symbol: str):
+    """Ubah BTCUSDT → BTC_USDT agar sesuai format MEXC."""
+    symbol = symbol.replace("-", "").replace("_", "")
+    base = symbol[:-4]
+    quote = symbol[-4:]
+    return f"{base}_{quote}".upper()
+
+
 def load_initial_candles(symbol="BTCUSDT"):
     """
-    Ambil historical candle 1 menit dari MEXC
-    FORMAT MEXC: [timestamp, open, high, low, close, volume]
+    Ambil historical candle 1 menit dari MEXC.
+    Format MEXC: [open time, open, high, low, close, volume, close time, ...]
     """
-    
+    # Normalisasi symbol ke format MEXC
+    symbol = normalize_symbol(symbol)
+
     url = f"https://api.mexc.com/api/v3/klines?symbol={symbol}&interval=1m&limit=200"
 
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=10)
         data = r.json()
 
-        # Jika responsenya bukan list (biasanya error)
+        # Jika MEXC mengembalikan error JSON
         if not isinstance(data, list):
             print("⚠ ERROR MEXC:", data)
             return pd.DataFrame()
 
+        # MEXC format (6 pertama dipakai)
         df = pd.DataFrame(data, columns=[
-            "time", "open", "high", "low", "close", "volume",
-            "c1","c2","c3","c4","c5","c6"   # extra fields ignored
+            "time",     # open time
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "c1", "c2", "c3", "c4", "c5", "c6"
         ])
 
-        # Convert type
+        # Convert tipe data
         df["time"] = pd.to_datetime(df["time"], unit="ms")
-        df[["open","high","low","close","volume"]] = df[["open","high","low","close","volume"]].astype(float)
+        df[["open", "high", "low", "close", "volume"]] = \
+            df[["open", "high", "low", "close", "volume"]].astype(float)
 
-        df = df[["time","open","high","low","close","volume"]]
-
-        return df
+        return df[["time", "open", "high", "low", "close", "volume"]]
 
     except Exception as e:
         print("⚠ ERROR data_loader:", e)
