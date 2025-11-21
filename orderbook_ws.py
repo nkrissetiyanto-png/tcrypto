@@ -5,7 +5,7 @@ import pandas as pd
 
 class OrderbookWebSocket:
     def __init__(self, symbol="btcusdt"):
-        self.url = f"wss://stream.binance.com:9443/ws/{symbol}@depth@100ms"
+        self.url = f"wss://data-stream.binance.vision/ws/{SYMBOL}@kline_1s"
         self.bids = pd.DataFrame(columns=["price", "qty"])
         self.asks = pd.DataFrame(columns=["price", "qty"])
 
