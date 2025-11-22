@@ -7,7 +7,7 @@ def load_initial_candles(symbol="BTC_USDT"):
     Load historical 1-minute candles dari endpoint spot MEXC yang resmi & stabil.
     """
 
-    url = f"https://www.mexc.com/open/api/v2/market/kline?symbol={symbol}&interval=1min&limit=200"
+    url = f"https://api.mexc.com/api/v3/depth?symbol={symbol}&limit=20"
 
     try:
         r = requests.get(url, timeout=8)
