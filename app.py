@@ -44,17 +44,17 @@ df_live = cs.df.copy()
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-price_realtime = df['close'].iloc[-1] if len(df) > 0 else None
+#price_realtime = df['close'].iloc[-1] if len(df) > 0 else None
 
 # ==============================================================
 # 4) SIDEBAR STATUS PANEL
 # ==============================================================
 
 st.sidebar.write("📡 WebSocket Connected:", getattr(cs, "is_running", True))
-st.sidebar.write("📈 Last Price:", price_realtime)
+#st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
-st.sidebar.write("Jumlah Bar:", len(df))
+st.sidebar.write("📈 Jumlah Bar:", len(df))
 
 # ==============================================================
 # 5) DEBUG PANEL
