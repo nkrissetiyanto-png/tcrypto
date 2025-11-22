@@ -44,17 +44,17 @@ df_live = cs.df.copy()
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-price_realtime = cs.df['close'].iloc[-1] if len(cs.df) > 0 else None
+#price_realtime = cs.df['close'].iloc[-1] if len(cs.df) > 0 else None
 
 # ==============================================================
 # 4) SIDEBAR STATUS PANEL
 # ==============================================================
 
 st.sidebar.write("📡 WebSocket Connected:", getattr(cs, "is_running", True))
-st.sidebar.write("📈 Last Price:", price_realtime)
+#st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
-st.sidebar.write("📈 Jumlah Bar:", len(cs.df))
+#st.sidebar.write("📈 Jumlah Bar:", len(cs.df))
 
 # ==============================================================
 # 5) DEBUG PANEL
@@ -70,11 +70,8 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
 
-    st.subheader("RAW DEPTH (REST)")
-    st.json(depth_raw)
-
     st.subheader(" LIVE CANDLE DataFrame")
-    st.dataframe(cs.df.tail(20))
+    st.dataframe(df_live.tail(20))
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
@@ -84,7 +81,7 @@ col1, col2 = st.columns([3, 1])
 with col1:
     st.subheader("Realtime Candle Chart (1m)")
 
-    df_live = cs.df.copy()
+    #df_live = cs.df.copy()
 
     if len(df_live) > 0:
         fig = go.Figure()
