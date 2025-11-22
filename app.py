@@ -71,7 +71,7 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
     st.dataframe(asks_df)
 
     st.subheader(" LIVE CANDLE DataFrame")
-    st.dataframe(df_live.tail(20))
+    st.dataframe(df_live)
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
