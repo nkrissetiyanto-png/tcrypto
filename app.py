@@ -19,7 +19,7 @@ st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Sty
 # 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-#df = load_initial_candles("BTCUSDT")
+df = load_initial_candles("BTC_USDT")
 
 # ==============================================================
 # 2) START WEBSOCKET
@@ -39,22 +39,22 @@ ai = AIPredictor()
 #ws = MEXCWebSocket("BTC_USDT")
 #ws.start()
 
-df_live = cs.df.copy()
+df_live = df.copy()
 
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-#price_realtime = cs.df['close'].iloc[-1] if len(cs.df) > 0 else None
+price_realtime = df['close'].iloc[-1] if len(cs.df) > 0 else None
 
 # ==============================================================
 # 4) SIDEBAR STATUS PANEL
 # ==============================================================
 
 st.sidebar.write("📡 WebSocket Connected:", getattr(cs, "is_running", True))
-#st.sidebar.write("📈 Last Price:", price_realtime)
+st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
-st.sidebar.write("📈 Jumlah Bar:", len(df_live))
+st.sidebar.write("📈 Jumlah Bar:", len(df))
 
 # ==============================================================
 # 5) DEBUG PANEL
