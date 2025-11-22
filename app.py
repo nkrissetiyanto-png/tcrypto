@@ -40,6 +40,8 @@ ai = AIPredictor()
 ws = MEXCWebSocket("BTC_USDT")
 ws.start()
 
+df_live = ws.df.copy()
+
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
@@ -80,18 +82,18 @@ with col1:
 
     # Ambil data dari websocket bila tersedia
     #df_live = ws.df if getattr(ws, "df", None) is not None else df
-    df_live = cs.df if len(cs.df) > 0 else df
-
-    fig = go.Figure()
-    fig.add_trace(go.Candlestick(
-        x=df_live["time"],
-        open=df_live["open"],
-        high=df_live["high"],
-        low=df_live["low"],
-        close=df_live["close"]
-    ))
-    fig.update_layout(height=500, template="plotly_dark")
-    st.plotly_chart(fig, use_container_width=True)
+    if len(df_live) > 0:
+        fig = go.Figure()
+        fig.add_trace(go.Candlestick(
+            x=df_live["time"],
+            open=df_live["open"],
+            high=df_live["high"],
+            low=df_live["low"],
+            close=df_live["close"]
+        ))
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Menunggu data candle dari WebSocket...")
 
 with col2:
     st.subheader("Orderbook Depth")
