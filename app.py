@@ -20,7 +20,7 @@ st.title("🚀 Nanang AI — BTCUSDT Realtime Dashboard (Premium TradingView Sty
 # 1) LOAD INITIAL CANDLE DATA
 # ==============================================================
 
-df = load_initial_candles("BTCUSDT")
+#df = load_initial_candles("BTCUSDT")
 
 # ==============================================================
 # 2) START WEBSOCKET
