@@ -44,7 +44,7 @@ df_live = cs.df.copy()
 ob = OrderbookMEXC("BTC_USDT")
 depth_raw, bids_df, asks_df = ob.get_depth()
 
-price_realtime = cs.df['close'].iloc[-1] if len(df) > 0 else None
+price_realtime = cs.df['close'].iloc[-1] if len(cs.xdf) > 0 else None
 
 # ==============================================================
 # 4) SIDEBAR STATUS PANEL
