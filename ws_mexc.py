@@ -1,50 +1,75 @@
 import websocket
-import json
 import threading
+import json
 import pandas as pd
+from datetime import datetime
 
 class MEXCWebSocket:
     def __init__(self, symbol="BTC_USDT"):
-        self.symbol = symbol
         self.url = "wss://wbs.mexc.com/ws"
-        self.last_candle = None
+        self.symbol = symbol
+
+        # dataframe candle
         self.df = pd.DataFrame(columns=["time","open","high","low","close","volume"])
 
-    def _on_message(self, ws, msg):
-        data = json.loads(msg)
-
-        if "data" not in data:
-            return
-
-        k = data["data"]
-
-        candle = {
-            "time": pd.to_datetime(k["t"], unit='ms'),
-            "open": float(k["o"]),
-            "high": float(k["h"]),
-            "low": float(k["l"]),
-            "close": float(k["c"]),
-            "volume": float(k["v"]),
-        }
-
-        self.last_candle = candle
-        self.df = pd.concat([self.df, pd.DataFrame([candle])], ignore_index=True)
-
-    def _on_open(self, ws):
-        sub = {
-            "method": "SUBSCRIPTION",
-            "params": [f"spot@public.kline.v3.api@{self.symbol}@Min1"]
-        }
-        ws.send(json.dumps(sub))
+        # candle aktif (real-time 1 menit)
+        self.current_candle = None
 
     def start(self):
-        t = threading.Thread(target=self._run, daemon=True)
-        t.start()
+        thread = threading.Thread(target=self._run)
+        thread.daemon = True
+        thread.start()
 
     def _run(self):
         ws = websocket.WebSocketApp(
             self.url,
-            on_open=self._on_open,
-            on_message=self._on_message
+            on_open=self.on_open,
+            on_message=self.on_message,
         )
         ws.run_forever()
+
+    def on_open(self, ws):
+        sub = {
+            "method": "sub.deal",
+            "params": { "symbol": self.symbol },
+            "id": 1
+        }
+        ws.send(json.dumps(sub))
+
+    def on_message(self, ws, msg):
+        data = json.loads(msg)
+
+        if "params" not in data:
+            return
+
+        tick = data["params"]
+
+        price = float(tick["deal_price"])
+        vol   = float(tick["deal_volume"])
+        ts    = int(tick["ts"]) // 1000  # detik
+
+        minute = datetime.utcfromtimestamp(ts).replace(second=0, microsecond=0)
+
+        # jika candle baru (menit berganti)
+        if (self.current_candle is None) or (self.current_candle["time"] != minute):
+
+            # simpan candle yang lama ke df
+            if self.current_candle is not None:
+                self.df.loc[len(self.df)] = self.current_candle
+
+            # mulai candle baru
+            self.current_candle = {
+                "time": minute,
+                "open": price,
+                "high": price,
+                "low": price,
+                "close": price,
+                "volume": vol
+            }
+
+        else:
+            # update candle berjalan
+            self.current_candle["close"] = price
+            self.current_candle["high"] = max(self.current_candle["high"], price)
+            self.current_candle["low"]  = min(self.current_candle["low"], price)
+            self.current_candle["volume"] += vol
