@@ -54,7 +54,7 @@ st.sidebar.write("📡 WebSocket Connected:", getattr(cs, "is_running", True))
 #st.sidebar.write("📈 Last Price:", price_realtime)
 st.sidebar.write("🧊 Bids Count:", len(bids_df))
 st.sidebar.write("🔥 Asks Count:", len(asks_df))
-#st.sidebar.write("📈 Jumlah Bar:", len(cs.df))
+st.sidebar.write("📈 Jumlah Bar:", len(df_live))
 
 # ==============================================================
 # 5) DEBUG PANEL
