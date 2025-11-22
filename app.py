@@ -7,7 +7,6 @@ from smartmoney import compute_smart_money
 from orderbook_mexc import OrderbookMEXC
 from ws_mexc import MEXCWebSocket
 from ws_candle_mexc import MEXCCandleWS
-from orderbook_mexc import OrderbookMEXC
 
 cs = MEXCCandleWS("BTC_USDT")
 cs.start()
@@ -70,7 +69,12 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
 
     st.subheader("Parsed Asks")
     st.dataframe(asks_df)
-    
+
+    st.subheader("RAW DEPTH (REST)")
+    st.json(depth_raw)
+
+    st.subheader(" LIVE CANDLE DataFrame")
+    st.dataframe(cs.df.tail(20))
 # ==============================================================
 # 6) LAYOUT — CHART & ORDERBOOK
 # ==============================================================
@@ -78,10 +82,10 @@ with st.expander("🔍 Debug Data (Klik untuk lihat)", expanded=False):
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.subheader("Realtime Chart (1m)")
+    st.subheader("Realtime Candle Chart (1m)")
 
-    # Ambil data dari websocket bila tersedia
-    #df_live = ws.df if getattr(ws, "df", None) is not None else df
+    df_live = cs.df.copy()
+
     if len(df_live) > 0:
         fig = go.Figure()
         fig.add_trace(go.Candlestick(
@@ -91,10 +95,10 @@ with col1:
             low=df_live["low"],
             close=df_live["close"]
         ))
+        fig.update_layout(height=520, template="plotly_dark")
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("Menunggu data candle dari WebSocket...")
-
 with col2:
     st.subheader("Orderbook Depth")
     st.write("Bids", bids_df.head())
